@@ -1,0 +1,26 @@
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: django-instrumentation
+  namespace: opentelemetry-operator-system  # Replace with your application's namespace if needed
+spec:
+  # Define exporters for traces and metrics
+  exporter:
+    endpoint: http://otel-collector:4317  # OTLP endpoint of the OpenTelemetry Collector
+  propagators:
+    - tracecontext
+    - baggage
+  python:
+    image: ghcr.io/open-telemetry/opentelemetry-python-contrib:latest  # Python auto-instrumentation image
+    env:
+      # Environment variables for traces and metrics exporters
+      - name: OTEL_TRACES_EXPORTER
+        value: otlp            # Export traces using OTLP
+      - name: OTEL_METRICS_EXPORTER
+        value: prometheus      # Export metrics to Prometheus
+      - name: OTEL_SERVICE_NAME
+        value: django-app      # Name your service for better identification
+      - name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: http://otel-collector:4317  # OTLP endpoint for traces
+      - name: OTEL_RESOURCE_ATTRIBUTES
+        value: "service.name=django-app,service.version=1.0"  # Custom resource attributes

@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: django-app
+  namespace: opentelemetry-operator-system  # Ensure this matches your application's namespace
+  annotations:
+    instrumentation.opentelemetry.io/inject-python: "true"  # Enables auto-instrumentation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: django-app
+  template:
+    metadata:
+      labels:
+        app: django-app
+    spec:
+      containers:
+        - name: my-python-app
+          image: ramguguloth/djangoapp:v1
+          ports:
+            - containerPort: 8000  # Replace with your application's image
+          env:
+            - name: OTEL_SERVICE_NAME
+              value: django-app
+            - name: OTEL_TRACES_EXPORTER
+              value: otlp
+            - name: OTEL_METRICS_EXPORTER
+              value: prometheus
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://otel-collector:4317
